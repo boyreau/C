@@ -6,7 +6,7 @@
 #    By: aboyreau <bnzlvosnb@mozmail.com>                     +**+ -- ##+      #
 #                                                             # *   *. #*      #
 #    Created: 2024/07/12 02:16:49 by aboyreau          **+*+  * -_._-   #+     #
-#    Updated: 2024/12/21 12:20:19 by aboyreau          +#-.-*  +         *     #
+#    Updated: 2024/12/21 12:22:14 by aboyreau          +#-.-*  +         *     #
 #                                                      *-.. *   ++       #     #
 # **************************************************************************** #
 
@@ -118,8 +118,8 @@ test/common.o:
 
 # Run each test separately.
 test/%: %_test.c test/common.o $(OBJS) libs
-	@$(CC) $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) test/common.o $(OBJS) $< $(LDLIBS) -o $@
-	@(tabs -4 ; LD_LIBRARY_PATH=$(shell pwd) $@)
+	@$(CC) $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) test/common.o $(OBJS) $< $(LDLIBS) -o $@_test
+	@(tabs -4 ; LD_LIBRARY_PATH=$(shell pwd) $(DEBUGGER) $@_test)
 
 # Build raw coverage data for a specific test.
 %.profraw: CFLAGS+=-fprofile-instr-generate -fcoverage-mapping

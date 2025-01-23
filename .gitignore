@@ -1,4 +1,7 @@
+.d/
+obj/
+bin/
+test/common.o
+test/*.prof*
+test/*_test
 compile_commands.json
-obj
-bin
-

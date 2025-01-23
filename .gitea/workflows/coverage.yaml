@@ -16,4 +16,4 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@v4
       - run: |
-          make stats | jq -c .data[0].files.[] > /mnt/coverage/$(date +%Y-%m-%d).json
+          make stats | jq -c .data[0].files.[] > /mnt/coverage/$(date +%Y-%m-%d).json || make stats && exit 1

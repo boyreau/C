@@ -6,7 +6,7 @@
 #    By: aboyreau <bnzlvosnb@mozmail.com>                     +**+ -- ##+      #
 #                                                             # *   *. #*      #
 #    Created: 2024/07/12 02:16:49 by aboyreau          **+*+  * -_._-   #+     #
-#    Updated: 2025/01/17 15:19:51 by aboyreau          +#-.-*  +         *     #
+#    Updated: 2025/01/17 18:50:50 by aboyreau          +#-.-*  +         *     #
 #                                                      *-.. *   ++       #     #
 # **************************************************************************** #
 
@@ -110,6 +110,8 @@ libs:
 check: CFLAGS+=-fprofile-instr-generate -fcoverage-mapping -g
 check: CPPFLAGS+=-D TEST -D COVERAGE
 check: $(TESTS)
+
+stats: $(NAME)_coverage.json
 
 # Get JSON-formatted stats about the current project coverage.
 $(NAME)_coverage.json: bin/test/$(NAME).profdata

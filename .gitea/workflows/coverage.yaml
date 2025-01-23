@@ -12,5 +12,5 @@ jobs:
           #pacman -Sy docker docker-compose llvm 
       - name: Check out repository code
         uses: actions/checkout@v4
-      - run: make check
+      - run: make stats
       - run: make ${{ gitea.repository}}_coverage.json; mv ${{ gitea.repository }}_coverage.json /mnt/coverage/

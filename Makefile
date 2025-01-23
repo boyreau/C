@@ -6,7 +6,7 @@
 #    By: aboyreau <bnzlvosnb@mozmail.com>                     +**+ -- ##+      #
 #                                                             # *   *. #*      #
 #    Created: 2024/07/12 02:16:49 by aboyreau          **+*+  * -_._-   #+     #
-#    Updated: 2025/01/18 09:32:12 by aboyreau          +#-.-*  +         *     #
+#    Updated: 2025/01/18 09:34:48 by aboyreau          +#-.-*  +         *     #
 #                                                      *-.. *   ++       #     #
 # **************************************************************************** #
 
@@ -143,13 +143,13 @@ bin/test/%: CFLAGS+=-fprofile-instr-generate -fcoverage-mapping -g
 bin/test/%: CPPFLAGS+=-D TEST -D COVERAGE -D DEBUG
 bin/test/%: %.c obj/test/common.o $(OBJS)
 	@mkdir -p $(@D)
-	@$(CC) $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) $^ $(LDLIBS) -o $@
+	$(CC) $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) $^ $(LDLIBS) -o $@
 	@(tabs -4 ; $(DEBUGGER) $@)
 
 # Put everything common to your tests in test/common.c.
 obj/test/common.o:
 	@mkdir -p $(@D)
-	@$(CC) -Wall -Wextra -Werror -I include -I lib/libft/include test/common.c -c -o obj/test/common.o
+	$(CC) -Wall -Wextra -Werror -I include -I lib/libft/include test/common.c -c -o obj/test/common.o
 
 
 ############################## .h DEPENDENCIES RULE ############################

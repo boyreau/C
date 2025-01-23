@@ -6,13 +6,11 @@
 /*   By: aboyreau <bnzlvosnb@mozmail.com>                     +**+ -- ##+     */
 /*                                                            # *   *. #*     */
 /*   Created: 2024/12/21 11:56:59 by aboyreau          **+*+  * -_._-   #+    */
-/*   Updated: 2024/12/21 11:57:10 by aboyreau          +#-.-*  +         *    */
+/*   Updated: 2024/12/21 12:25:33 by aboyreau          +#-.-*  +         *    */
 /*                                                     *-.. *   ++       #    */
 /* ************************************************************************** */
 
 #ifndef MAIN_H
 #define MAIN_H
-
-int oui(int a, int b);
 
 #endif

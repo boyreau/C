@@ -10,12 +10,10 @@ jobs:
         - coverage:/mnt/coverage
     steps:
       - run: |
-          ls /mnt/coverage
           pacman -Syu --noconfirm
           pacman -Sy --noconfirm llvm clang nodejs make 
           #pacman -Sy docker docker-compose llvm 
       - name: Check out repository code
         uses: actions/checkout@v4
       - run: |
-          make stats
-          
+          make stats | jq -c .data[0].files.[] > /mnt/coverage/$(date +%Y-%m-%d).json

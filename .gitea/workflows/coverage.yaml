@@ -1,0 +1,15 @@
+name: Code coverage checker
+run-name: ${{ gitea.actor }} will ensure your code passes this repository's requirements.
+on: [push]
+
+jobs:
+  Explore-Gitea-Actions:
+    runs-on: archlinux-latest
+    steps:
+      - run: |
+          pacman -Syu
+          pacman -Sy clang
+      - name: Check out repository code
+        uses: actions/checkout@v4
+      - run: make check
+      - run: make ${{ gitea.repository}}_coverage.json; mv ${{ gitea.repository }}_coverage.json /mnt/coverage/

@@ -1,7 +1,12 @@
 #!/bin/bash
 
-echo "Please name your directory :"
-read DIR
+if [ $# = 1 ]
+then
+	DIR=$1
+else
+	echo "Please name your directory :"
+	read DIR
+fi
 
 echo "Please name your codberg repo [$DIR]:"
 read REPO
@@ -39,7 +44,23 @@ case "$NAME" in
 		;;
 esac
 
-echo 'tea repo create -name "$REPO"'
+if [ -n "$(which tea)" ] && [ -n "$REPO" ]
+then
+	tea repo create -name "$REPO"
+elif [ -z "$(which tea)" ]
+then
+	echo "Please install tea (https://gitea.com/gitea/tea) for automated gitea repository creation."
+fi
+
+if [ -n "$(which gh)" ] && [ -n "$REPO" ]
+then
+	gh repo create "$REPO"
+elif [ -z "$(which gh)" ]
+then
+	echo "Please install gh (https://cli.github.com) for automated github repository creation."
+fi
+
+rm 42init
 
 echo 'Git intialization'
 git init

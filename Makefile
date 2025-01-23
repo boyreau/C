@@ -6,7 +6,7 @@
 #    By: aboyreau <bnzlvosnb@mozmail.com>                     +**+ -- ##+      #
 #                                                             # *   *. #*      #
 #    Created: 2024/07/12 02:16:49 by aboyreau          **+*+  * -_._-   #+     #
-#    Updated: 2024/12/21 12:22:14 by aboyreau          +#-.-*  +         *     #
+#    Updated: 2024/12/22 01:22:29 by aboyreau          +#-.-*  +         *     #
 #                                                      *-.. *   ++       #     #
 # **************************************************************************** #
 
@@ -49,7 +49,7 @@ $(eval CPPFLAGS+=$(addprefix -I ,$(addprefix lib/,$(addprefix $(LIBS),/include))
 # Libraries that should be used.
 $(eval LDFLAGS+=$(addprefix -L ,$(addprefix lib/,$(LIBS))))
 # Libraries that should be linked.
-$(eval LDLIBS+=$(subst lib,-l ,$(LIBS)))
+$(eval LDLIBS+=$(subst lib,-l,$(LIBS)))
 
 vpath %.c src/
 vpath %.o obj/
@@ -69,7 +69,7 @@ all: libs $(NAME)
 # Builds the project's main target.
 $(NAME): $(OBJS)
 	@mkdir -p $(@D)
-	ar rcs $(NAME) $(OBJS)
+	$(CC) $(LDFLAGS) $(OBJS) -o $(NAME) $(LDLIBS)
 
 # Compiles a specific C file into a object file.
 obj/%.o: %.c

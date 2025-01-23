@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   Explore-Gitea-Actions:
-    runs-on: archlinux-latest
+    runs-on: archlinux
     steps:
       - run: |
           pacman -Syu

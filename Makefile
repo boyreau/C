@@ -6,7 +6,7 @@
 #    By: aboyreau <bnzlvosnb@mozmail.com>                     +**+ -- ##+      #
 #                                                             # *   *. #*      #
 #    Created: 2024/07/12 02:16:49 by aboyreau          **+*+  * -_._-   #+     #
-#    Updated: 2025/01/18 09:21:16 by aboyreau          +#-.-*  +         *     #
+#    Updated: 2025/01/18 09:32:12 by aboyreau          +#-.-*  +         *     #
 #                                                      *-.. *   ++       #     #
 # **************************************************************************** #
 
@@ -128,7 +128,7 @@ vcov: bin/test/$(NAME).profdata
 # Generate a summary of the code coverage of the project.
 bin/test/$(NAME).profdata: $(addsuffix .profraw,$(TESTS))
 	$(eval PROFRAW_FILES=$(addsuffix .profraw,$(TESTS)))
-	llvm-profdata merge $(PROFRAW_FILES) -o ./bin/test/$(NAME).profdata; rm default.profraw
+	@llvm-profdata merge $(PROFRAW_FILES) -o ./bin/test/$(NAME).profdata; rm default.profraw
 
 # Build coverage data from raw coverage data.
 %.profdata: %.profraw
@@ -136,14 +136,14 @@ bin/test/$(NAME).profdata: $(addsuffix .profraw,$(TESTS))
 
 # Build raw coverage data for a specific test.
 %.profraw: %
-	env LLVM_PROFILE_FILE="$@" $*
+	@env LLVM_PROFILE_FILE="$@" $*
 
 # Run each test separately.
 bin/test/%: CFLAGS+=-fprofile-instr-generate -fcoverage-mapping -g
 bin/test/%: CPPFLAGS+=-D TEST -D COVERAGE -D DEBUG
 bin/test/%: %.c obj/test/common.o $(OBJS)
 	@mkdir -p $(@D)
-	$(CC) $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) $^ $(LDLIBS) -o $@
+	@$(CC) $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) $^ $(LDLIBS) -o $@
 	@(tabs -4 ; $(DEBUGGER) $@)
 
 # Put everything common to your tests in test/common.c.

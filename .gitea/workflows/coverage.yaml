@@ -10,7 +10,7 @@ jobs:
         - coverage:/mnt/coverage
     steps:
       - run: |
-          ls /mnt/coverage || echo
+          ls /mnt/coverage
           pacman -Syu --noconfirm
           pacman -Sy --noconfirm llvm clang nodejs make 
           #pacman -Sy docker docker-compose llvm 

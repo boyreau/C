@@ -5,6 +5,9 @@ on: [push]
 jobs:
   Explore-Gitea-Actions:
     runs-on: archlinux
+    container:
+      volumes:
+        - coverage:/mnt/coverage
     steps:
       - run: |
           ls /mnt/coverage || echo

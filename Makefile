@@ -6,7 +6,7 @@
 #    By: aboyreau <bnzlvosnb@mozmail.com>                     +**+ -- ##+      #
 #                                                             # *   *. #*      #
 #    Created: 2024/07/12 02:16:49 by aboyreau          **+*+  * -_._-   #+     #
-#    Updated: 2024/12/13 02:10:26 by aboyreau          +#-.-*  +         *     #
+#    Updated: 2024/12/14 19:37:39 by aboyreau          +#-.-*  +         *     #
 #                                                      *-.. *   ++       #     #
 # **************************************************************************** #
 
@@ -43,7 +43,7 @@ all: $(LIBFT) $(NAME)
 
 
 #https://www.gnu.org/software/make/manual/html_node/Automatic-Prerequisites.html
-include $(OBJS:.o=.d)
+include $(SRCS:.c=.d)
 
 # Ensure C files are rebuilt if one of the .h they depend on changes.
 %.d: %.c
@@ -59,6 +59,7 @@ $(LIBFT):
 
 # Builds the project's main target.
 $(NAME): $(OBJS)
+	@mkdir -p $(@D)
 	$(CC) $(LDFLAGS) $(OBJS) -o $(NAME) $(LDLIBS)
 
 # Compiles a specific C file into a object file.

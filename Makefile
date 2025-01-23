@@ -6,7 +6,7 @@
 #    By: aboyreau <bnzlvosnb@mozmail.com>                     +**+ -- ##+      #
 #                                                             # *   *. #*      #
 #    Created: 2024/07/12 02:16:49 by aboyreau          **+*+  * -_._-   #+     #
-#    Updated: 2024/12/13 02:00:45 by aboyreau          +#-.-*  +         *     #
+#    Updated: 2024/12/13 02:10:26 by aboyreau          +#-.-*  +         *     #
 #                                                      *-.. *   ++       #     #
 # **************************************************************************** #
 
@@ -83,9 +83,9 @@ fclean: clean
 check: $(NAME) $(TESTS)
 
 # Execute a specific test.
-src/tests/%.c: phony
+tests/%.c: phony
 	@$(CC) $(CFLAGS) $(CPPFLAGS) $@ $(NAME) -L $(LIBFT_PATH) -lft
-	@(tabs -4 ; env LD_LIBRARY_PATH=$(shell pwd) $(DEBUGER) ./a.out)
+	@(tabs -4 ; $(DEBUGER) ./a.out)
 	@rm a.out
 
  # https://stackoverflow.com/questions/35730218/how-to-automatically-generate-a-makefile-help-command

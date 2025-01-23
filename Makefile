@@ -6,7 +6,7 @@
 #    By: aboyreau <bnzlvosnb@mozmail.com>                     +**+ -- ##+      #
 #                                                             # *   *. #*      #
 #    Created: 2024/07/12 02:16:49 by aboyreau          **+*+  * -_._-   #+     #
-#    Updated: 2025/01/17 18:50:50 by aboyreau          +#-.-*  +         *     #
+#    Updated: 2025/01/18 09:21:16 by aboyreau          +#-.-*  +         *     #
 #                                                      *-.. *   ++       #     #
 # **************************************************************************** #
 
@@ -115,7 +115,7 @@ stats: $(NAME)_coverage.json
 
 # Get JSON-formatted stats about the current project coverage.
 $(NAME)_coverage.json: bin/test/$(NAME).profdata
-	llvm-cov export -instr-profile=./bin/test/$(NAME).profdata $(TESTS) -sources $(SRCS) --summary-only
+	@llvm-cov export -instr-profile=./bin/test/$(NAME).profdata $(TESTS) -sources $(SRCS)
 
 # Human-readable summary about coverage.
 rcov: bin/test/$(NAME).profdata

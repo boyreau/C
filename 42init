@@ -8,11 +8,16 @@ else
 	read DIR
 fi
 
-echo "Please name your codberg repo [$DIR]:"
-read REPO
-if [ -z "$REPO" ]
+echo "Create a remote repository ? Y/n"
+read ACCEPT
+if [ -n "$ACCEPT" ] && [ $ACCEPT != 'n' ]
 then
-	REPO=$DIR
+	echo "Please name your codberg repo [$DIR]:"
+	read REPO
+	if [ -z "$REPO" ]
+	then
+		REPO=$DIR
+	fi
 fi
 
 echo "Please name your binary file [$DIR]:"

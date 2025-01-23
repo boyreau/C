@@ -6,7 +6,7 @@
 #    By: aboyreau <bnzlvosnb@mozmail.com>                     +**+ -- ##+      #
 #                                                             # *   *. #*      #
 #    Created: 2024/07/12 02:16:49 by aboyreau          **+*+  * -_._-   #+     #
-#    Updated: 2024/12/28 15:34:46 by aboyreau          +#-.-*  +         *     #
+#    Updated: 2025/01/02 14:03:23 by aboyreau          +#-.-*  +         *     #
 #                                                      *-.. *   ++       #     #
 # **************************************************************************** #
 
@@ -46,11 +46,11 @@ CFLAGS +=	-Wall \
 CPPFLAGS += -I include
 
 # Linker flags.
-$(eval CPPFLAGS+=$(addprefix -I ,$(addprefix lib/,$(addprefix $(LIBS),/include))))
+$(eval CPPFLAGS+=$(addprefix -I ,$(addprefix lib/,$(addsuffix /include,$(LIBS)))))
 # Libraries that should be used.
-$(eval LDFLAGS+=$(addprefix -L ,$(addprefix lib/,$(LIBS))))
+$(eval LDFLAGS+=$(addprefix -L ,$(addprefix lib/,$(addsuffix /lib,$(LIBS)))))
 # Libraries that should be linked.
-$(eval LDLIBS+=$(subst lib,-l,$(LIBS)))
+$(eval LDLIBS+= -Wl,-Bstatic $(subst lib,-l,$(LIBS)) -Wl,-Bdynamic)
 
 vpath %.c src/
 vpath %.o obj/
@@ -96,7 +96,7 @@ fclean: clean
 	$(RM) $(NAME)
 
 libs:
-	for lib in $(LIBS);			\
+	@for lib in $(LIBS);			\
 	do							\
 		$(MAKE) -C lib/$$lib;	\
 	done;
@@ -125,17 +125,15 @@ test/common.o:
 	@$(CC) -Wall -Wextra -Werror -I include -I lib/libft/include test/common.c -c -o test/common.o
 
 # Run each test separately.
-test/%: TEST_OBJ=$(subst test/,obj/,$@).o 
-test/%: TEST_BIN=$@_test
+test/%: CFLAGS+=-D DEBUG 
 test/%: %_test.c test/common.o $(OBJS) libs
-	$(CC) $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) test/common.o $(TEST_OBJ) $< $(LDLIBS) -o $(TEST_BIN)
+	$(CC) $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) test/common.o obj/$*.o $< $(LDLIBS) -o $@_test
 	@(tabs -4 ; $(DEBUGGER) $@_test)
 
 # Build raw coverage data for a specific test.
 %.profraw: CFLAGS+=-fprofile-instr-generate -fcoverage-mapping
-%.profraw: TEST_BIN=$(subst .profraw,_test,$@)
 %.profraw: $(OBJS) libs test/common.o %
-	env LLVM_PROFILE_FILE="$@" $(TEST_BIN)
+	env LLVM_PROFILE_FILE="$@" $*_test
 
 # Build coverage data from raw coverage data.
 %.profdata: test/%.profraw

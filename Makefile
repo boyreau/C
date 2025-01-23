@@ -6,7 +6,7 @@
 #    By: aboyreau <bnzlvosnb@mozmail.com>                     +**+ -- ##+      #
 #                                                             # *   *. #*      #
 #    Created: 2024/07/12 02:16:49 by aboyreau          **+*+  * -_._-   #+     #
-#    Updated: 2024/12/22 14:51:07 by aboyreau          +#-.-*  +         *     #
+#    Updated: 2024/12/22 16:38:17 by aboyreau          +#-.-*  +         *     #
 #                                                      *-.. *   ++       #     #
 # **************************************************************************** #
 
@@ -118,27 +118,21 @@ test/common.o:
 	@$(CC) -Wall -Wextra -Werror -I include -I libs/libft/includes test/common.c -c -o test/common.o
 
 # Run each test separately.
+test/%: TEST_OBJ=$(subst test/,obj/,$@).o 
+test/%: TEST_BIN=$@_test
 test/%: %_test.c test/common.o $(OBJS) libs
-	@$(CC) $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) test/common.o $(subst test/,obj/,$@).o $< $(LDLIBS) -o $@_test
+	@$(CC) $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) test/common.o $(TEST_OBJ) $< $(LDLIBS) -o $(TEST_BIN)
 	@(tabs -4 ; LD_LIBRARY_PATH=$(shell pwd) $(DEBUGGER) $@_test)
 
 # Build raw coverage data for a specific test.
 %.profraw: CFLAGS+=-fprofile-instr-generate -fcoverage-mapping
-%.profraw: TEST_SOURCE=$(subst .profraw,_test,$@).c
 %.profraw: TEST_BIN=$(subst .profraw,_test,$@)
-%.profraw: $(OBJS) $(LIBFT) test/common.o 
-	@$(CC) $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) test/common.o $(OBJS) $(TEST_SOURCE) $(LDLIBS) -o $(TEST_BIN)
+%.profraw: $(OBJS) libs test/common.o %
 	@env LLVM_PROFILE_FILE="$@" LD_LIBRARY_PATH=$(shell pwd) $(TEST_BIN) >/dev/null 2>/dev/null
 
 # Build coverage data from raw coverage data.
 %.profdata: test/%.profraw
 	@llvm-profdata merge -sparse $< -o $@
-
-# Display a coverage summary for a specific test.
-coverage/%.report: TEST_SOURCE=$(subst coverage/,obj/,$(subst .report,,$@).o)
-coverage/%.report: %.profdata
-	@mkdir -p $(@D)
-	@llvm-cov report -instr-profile=$< -show-functions $(TEST_SOURCE) $(subst .profdata,,$(subst test/,src/,$<)).c
 
 
 ############################## .h DEPENDENCIES RULE ############################

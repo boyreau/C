@@ -6,7 +6,7 @@
 #    By: aboyreau <bnzlvosnb@mozmail.com>                     +**+ -- ##+      #
 #                                                             # *   *. #*      #
 #    Created: 2024/07/12 02:16:49 by aboyreau          **+*+  * -_._-   #+     #
-#    Updated: 2025/01/02 14:03:23 by aboyreau          +#-.-*  +         *     #
+#    Updated: 2025/01/17 15:19:51 by aboyreau          +#-.-*  +         *     #
 #                                                      *-.. *   ++       #     #
 # **************************************************************************** #
 
@@ -25,10 +25,12 @@ SRCS = $(addprefix src/, $(addsuffix .c, $(SRC)))
 OBJS = $(addprefix obj/, $(addsuffix .o, $(SRC)))
 
 # Tests files.
-TESTS = test/main
+tests = main
+
+TESTS = $(addsuffix _test,$(addprefix bin/test/,$(tests)))
 
 # Libraries to build and to link against the main executable
-LIBS = libft
+LIBS =
 
 # C compilations flags.
 # The last three can be safely removed but should be kept if possible.
@@ -104,40 +106,48 @@ libs:
 
 ############################## UNITS TESTS RULES ###############################
 
-# Generate a summary of the code coverage of the project.
-coverage: CFLAGS+=-fprofile-instr-generate -fcoverage-mapping
-coverage: CPPFLAGS+=-D TEST -D COVERAGE
-coverage: fclean test/common.o $(addsuffix .profraw,$(TESTS))
-	@$(eval PROFRAW_FILES=$(addsuffix .profraw,$(TESTS)))
-	@llvm-profdata merge -sparse $(PROFRAW_FILES) -o test/coverage.profdata
-
-rcov: coverage
-	llvm-cov report -instr-profile=test/coverage.profdata $(addsuffix _test, $(addprefix --object=,$(TESTS))) -sources $(SRCS)
-
-vcov: coverage
-	llvm-cov show -instr-profile=test/coverage.profdata $(addsuffix _test, $(addprefix --object=,$(TESTS))) -sources $(SRCS)
-
 # Run unit tests.
-check: fclean $(TESTS)
+check: CFLAGS+=-fprofile-instr-generate -fcoverage-mapping -g
+check: CPPFLAGS+=-D TEST -D COVERAGE
+check: $(TESTS)
 
-# Put everything common to your tests in test/common.c.
-test/common.o:
-	@$(CC) -Wall -Wextra -Werror -I include -I lib/libft/include test/common.c -c -o test/common.o
+# Get JSON-formatted stats about the current project coverage.
+$(NAME)_coverage.json: bin/test/$(NAME).profdata
+	llvm-cov export -instr-profile=./bin/test/$(NAME).profdata $(TESTS) -sources $(SRCS) --summary-only
 
-# Run each test separately.
-test/%: CFLAGS+=-D DEBUG 
-test/%: %_test.c test/common.o $(OBJS) libs
-	$(CC) $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) test/common.o obj/$*.o $< $(LDLIBS) -o $@_test
-	@(tabs -4 ; $(DEBUGGER) $@_test)
+# Human-readable summary about coverage.
+rcov: bin/test/$(NAME).profdata
+	llvm-cov report -instr-profile=./bin/test/$(NAME).profdata $(TESTS) -sources $(SRCS)
 
-# Build raw coverage data for a specific test.
-%.profraw: CFLAGS+=-fprofile-instr-generate -fcoverage-mapping
-%.profraw: $(OBJS) libs test/common.o %
-	env LLVM_PROFILE_FILE="$@" $*_test
+# Get a visual summary of covered and uncovered lines.
+vcov: bin/test/$(NAME).profdata
+	llvm-cov show -instr-profile=./bin/test/$(NAME).profdata $(TESTS) -sources $(SRCS)
+
+# Generate a summary of the code coverage of the project.
+bin/test/$(NAME).profdata: $(addsuffix .profraw,$(TESTS))
+	$(eval PROFRAW_FILES=$(addsuffix .profraw,$(TESTS)))
+	llvm-profdata merge $(PROFRAW_FILES) -o ./bin/test/$(NAME).profdata; rm default.profraw
 
 # Build coverage data from raw coverage data.
-%.profdata: test/%.profraw
-	@llvm-profdata merge -sparse $< -o $@
+%.profdata: %.profraw
+	@llvm-profdata merge $< -o $@
+
+# Build raw coverage data for a specific test.
+%.profraw: %
+	env LLVM_PROFILE_FILE="$@" $*
+
+# Run each test separately.
+bin/test/%: CFLAGS+=-fprofile-instr-generate -fcoverage-mapping -g
+bin/test/%: CPPFLAGS+=-D TEST -D COVERAGE -D DEBUG
+bin/test/%: %.c obj/test/common.o $(OBJS)
+	@mkdir -p $(@D)
+	$(CC) $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) $^ $(LDLIBS) -o $@
+	@(tabs -4 ; $(DEBUGGER) $@)
+
+# Put everything common to your tests in test/common.c.
+obj/test/common.o:
+	@mkdir -p $(@D)
+	@$(CC) -Wall -Wextra -Werror -I include -I lib/libft/include test/common.c -c -o obj/test/common.o
 
 
 ############################## .h DEPENDENCIES RULE ############################
@@ -163,4 +173,4 @@ include $(addprefix .cache/.d/, $(addsuffix .d, $(notdir $(SRC))))
 help:
 	@awk '/^#/{c=substr($$0,3);next}c&&/^[[:alpha:]][[:alnum:]_-]+:/{print substr($$1,1,index($$1,":")),c}1{c=0}' $(MAKEFILE_LIST) | column -s: -t
 
-.PHONY = all clean fclean re $(NAME) check coverage
+.PHONY = all clean fclean re check vcov rcov

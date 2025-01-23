@@ -6,11 +6,13 @@
 /*   By: aboyreau <bnzlvosnb@mozmail.com>                     +**+ -- ##+     */
 /*                                                            # *   *. #*     */
 /*   Created: 2024/12/21 11:56:59 by aboyreau          **+*+  * -_._-   #+    */
-/*   Updated: 2024/12/21 12:25:33 by aboyreau          +#-.-*  +         *    */
+/*   Updated: 2025/01/17 15:05:10 by aboyreau          +#-.-*  +         *    */
 /*                                                     *-.. *   ++       #    */
 /* ************************************************************************** */
 
 #ifndef MAIN_H
 #define MAIN_H
+
+int a_main(void);
 
 #endif

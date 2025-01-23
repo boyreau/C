@@ -1,4 +1,5 @@
 #include "common.h"
+#include "main.h"
 
 #include <assert.h>
 #include <stddef.h>
@@ -8,6 +9,7 @@
 
 static void test_example(void)
 {
+	a_main();
 	// Write a test here
 }
 

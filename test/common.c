@@ -6,12 +6,11 @@
 /*   By: aboyreau <bnzlvosnb@mozmail.com>                     +**+ -- ##+     */
 /*                                                            # *   *. #*     */
 /*   Created: 2024/12/23 17:46:01 by aboyreau          **+*+  * -_._-   #+    */
-/*   Updated: 2024/12/23 19:07:55 by aboyreau          +#-.-*  +         *    */
+/*   Updated: 2025/01/17 15:03:51 by aboyreau          +#-.-*  +         *    */
 /*                                                     *-.. *   ++       #    */
 /* ************************************************************************** */
 
 #include "common.h"
-#include "ft_tab.h"
 
 #include <unistd.h>
 
@@ -50,7 +49,7 @@ int main(void)
 	signal(SIGSEGV, abort_goto);
 	for (test_nb = setjmp(env); test_nb < (size_t) ft_tablen((void *) tests);)
 #else
-	for (test_nb = 0; test_nb < (size_t) ft_tablen((void *) tests);)
+	for (test_nb = 0; tests[test_nb] != NULL;)
 #endif
 	{
 		tests[test_nb]();

@@ -7,8 +7,8 @@ jobs:
     runs-on: archlinux
     steps:
       - run: |
-          pacman -Syu
-          pacman -Sy clang
+          pacman -Syu --noconfirm
+          pacman -Sy --noconfirm clang
       - name: Check out repository code
         uses: actions/checkout@v4
       - run: make check

@@ -6,7 +6,7 @@
 // If your functions requires another function to work, include it here
 // #include "../src/dependency.c"
 
-void test_example(void)
+static void test_example(void)
 {
 	// Write a test here
 }

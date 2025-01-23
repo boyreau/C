@@ -31,6 +31,7 @@ then
 fi
 
 cp -r ~/.local/skel/42project/* .
+cp ~/.local/skel/42project/.gitignore .
 
 case "$NAME" in
 	*.so | *.a)

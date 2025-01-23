@@ -6,7 +6,7 @@
 #    By: aboyreau <bnzlvosnb@mozmail.com>                     +**+ -- ##+      #
 #                                                             # *   *. #*      #
 #    Created: 2024/07/12 02:16:49 by aboyreau          **+*+  * -_._-   #+     #
-#    Updated: 2024/12/20 23:53:15 by aboyreau          +#-.-*  +         *     #
+#    Updated: 2024/12/21 12:20:19 by aboyreau          +#-.-*  +         *     #
 #                                                      *-.. *   ++       #     #
 # **************************************************************************** #
 
@@ -17,7 +17,7 @@ CC = clang
 NAME = REPLACE_WITH_NAME
 
 # Sources used to build the project.
-SRC =
+SRC = main
 
 # Sources with path and extension.
 SRCS = $(addprefix src/, $(addsuffix .c, $(SRC)))
@@ -25,11 +25,13 @@ SRCS = $(addprefix src/, $(addsuffix .c, $(SRC)))
 OBJS = $(addprefix obj/, $(addsuffix .o, $(SRC)))
 
 # Tests files.
-TESTS =
+TESTS = test/main
 
+# Libraries to build and to link against the main executable
 LIBS = libft
 
-# C compilations flags. The last three can be safely removed but should be kept if possible.
+# C compilations flags.
+# The last three can be safely removed but should be kept if possible.
 CFLAGS +=	-Wall \
 		 	-Wextra \
 		 	-Werror \
@@ -41,25 +43,36 @@ CFLAGS +=	-Wall \
 
 # C preprocessor flags
 CPPFLAGS += -I include
+
 # Linker flags.
-LDFLAGS += $(addprefix -I ,$(LIBS))
+$(eval CPPFLAGS+=$(addprefix -I ,$(addprefix lib/,$(addprefix $(LIBS),/include))))
 # Libraries that should be used.
-LDLIBS += $(subst lib,-l,$(LIBS))
+$(eval LDFLAGS+=$(addprefix -L ,$(addprefix lib/,$(LIBS))))
+# Libraries that should be linked.
+$(eval LDLIBS+=$(subst lib,-l ,$(LIBS)))
+
+vpath %.c src/
+vpath %.o obj/
+vpath %.d .d/
+vpath %_test.c test/
+
+vpath %.profraw test/
+vpath %.profdata test/
 
 
 ############################# GENERAL RULES #####################################
 
 # Builds the project.
-all: $(LIBFT) $(NAME)
+all: libs $(NAME)
 
 
 # Builds the project's main target.
 $(NAME): $(OBJS)
 	@mkdir -p $(@D)
-	$(CC) $(LDFLAGS) $(OBJS) -o $(NAME) $(LDLIBS)
+	ar rcs $(NAME) $(OBJS)
 
 # Compiles a specific C file into a object file.
-obj/%.o: src/%.c
+obj/%.o: %.c
 	@mkdir -p $(@D)
 	$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $@
 
@@ -68,11 +81,23 @@ re: fclean all
 
 # Deletes objects and depedencies' objects.
 clean:
-	$(RM) $(OBJS)
+	$(RM) -r obj/
+	$(RM) -r .d/
+	$(RM) -r bin/
+	$(RM) -r $(addsuffix _test,$(TESTS))
+	$(RM) -r coverage/
+	$(RM) -r test/*.prof*
+	$(RM) -r test/*.o
 
 # Deletes objects, binaries, libraries and dependencies
 fclean: clean
 	$(RM) $(NAME)
+
+libs:
+	for lib in $(LIBS);			\
+	do							\
+		$(MAKE) -C lib/$$lib;	\
+	done;
 
 
 ############################## UNITS TESTS RULES ###############################
@@ -81,50 +106,54 @@ fclean: clean
 coverage: CFLAGS+=-fprofile-instr-generate -fcoverage-mapping -D TEST=1
 coverage: $(addsuffix .profraw,$(TESTS)) $(NAME)
 	@$(eval PROFRAW_FILES=$(addsuffix .profraw,$(TESTS)))
-	@llvm-profdata merge -sparse $(PROFRAW_FILES) -o tests/coverage.profdata
-	llvm-cov report -instr-profile=tests/coverage.profdata $(addsuffix _test, $(addprefix --object=,$(TESTS))) -sources $(SRCS)
+	@llvm-profdata merge -sparse $(PROFRAW_FILES) -o test/coverage.profdata
+	llvm-cov report -instr-profile=test/coverage.profdata $(addsuffix _test, $(addprefix --object=,$(TESTS))) -sources $(SRCS)
 
 # Run unit tests.
 check: $(NAME) $(TESTS)
 
-# Put everything common to your tests in tests/common.c.
-tests/common.o:
-	@$(CC) -Wall -Wextra -Werror -I include -I libs/libft/includes tests/common.c -c -o tests/common.o
+# Put everything common to your tests in test/common.c.
+test/common.o:
+	@$(CC) -Wall -Wextra -Werror -I include -I libs/libft/includes test/common.c -c -o test/common.o
 
 # Run each test separately.
-tests/%: tests/%_test.c tests/common.o $(OBJS) $(LIBFT)
-	@$(CC) $(CFLAGS) $(CPPFLAGS) tests/common.o $(OBJS) $< -L libs/libft -lft -o $@
+test/%: %_test.c test/common.o $(OBJS) libs
+	@$(CC) $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) test/common.o $(OBJS) $< $(LDLIBS) -o $@
 	@(tabs -4 ; LD_LIBRARY_PATH=$(shell pwd) $@)
 
 # Build raw coverage data for a specific test.
-tests/%.profraw: CFLAGS+=-fprofile-instr-generate -fcoverage-mapping
-tests/%.profraw: TEST_SOURCE=$(subst .profraw,_test,$@).c
-tests/%.profraw: TEST_BIN=$(subst .profraw,_test,$@)
-tests/%.profraw: $(OBJS) $(LIBFT) tests/common.o 
-	@$(CC) $(CFLAGS) $(CPPFLAGS) tests/common.o $(OBJS) $(TEST_SOURCE) -L libs/libft -lft -o $(TEST_BIN)
+%.profraw: CFLAGS+=-fprofile-instr-generate -fcoverage-mapping
+%.profraw: TEST_SOURCE=$(subst .profraw,_test,$@).c
+%.profraw: TEST_BIN=$(subst .profraw,_test,$@)
+%.profraw: $(OBJS) $(LIBFT) test/common.o 
+	@$(CC) $(LDFLAGS) $(CFLAGS) $(CPPFLAGS) test/common.o $(OBJS) $(TEST_SOURCE) $(LDLIBS) -o $(TEST_BIN)
 	@env LLVM_PROFILE_FILE="$@" LD_LIBRARY_PATH=$(shell pwd) $(TEST_BIN) >/dev/null 2>/dev/null
 
 # Build coverage data from raw coverage data.
-tests/%.profdata: tests/%.profraw
+%.profdata: test/%.profraw
 	@llvm-profdata merge -sparse $< -o $@
 
 # Display a coverage summary for a specific test.
-coverag./%.report: TEST_SOURCE=$(subst coverage/,obj/,$(subst .report,,$@).o)
-coverage/%.report: tests/%.profdata
+coverage/%.report: TEST_SOURCE=$(subst coverage/,obj/,$(subst .report,,$@).o)
+coverage/%.report: %.profdata
 	@mkdir -p $(@D)
-	@llvm-cov report -instr-profile=$< -show-functions $(TEST_SOURCE) $(subst .profdata,,$(subst tests/,src/,$<)).c
+	@llvm-cov report -instr-profile=$< -show-functions $(TEST_SOURCE) $(subst .profdata,,$(subst test/,src/,$<)).c
 
 
 ############################## .h DEPENDENCIES RULE ############################
 
 #https://www.gnu.org/software/make/manual/html_node/Automatic-Prerequisites.html
-include $(SRCS:.c=.d)
+# Patched to work with obj/%.o.
 
-# Ensure C files are rebuilt if one of the .h they depend on changes.
-%.d: %.c
+# Trigger .d/%.d rule to include non-existing or outdated .d files.
+include $(addprefix .d/, $(addsuffix .d, $(notdir $(SRC))))
+
+# Generates .d files to add .h dependency on .o file (if .h changes, rebuilds .o for affected .c files)
+.d/%.d: %.c
+	@mkdir -p $(@D)
 	@set -e; rm -f $@; \
      $(CC) -M $(CPPFLAGS) $< > $@.$$$$; \
-     sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+     sed 's,\($*\)\.o[ :]*,obj/\1.o $@ : ,g' < $@.$$$$ > $@; \
      rm -f $@.$$$$
 
 

@@ -42,7 +42,7 @@ case "$NAME" in
 	*.so | *.a)
 		echo "*.so"
 		sed -i "s|REPLACE_WITH_NAME|lib/$NAME|g" Makefile
-		sed -i "s|^\t$(CC) $(LDFLAGS).*$|ar rc $(NAME) $(OBJS)|g"
+		sed -i "s|^\t$(CC) $(LDFLAGS).*$|ar rc $(NAME) $(OBJS)|g" Makefile
 		;;
 	*)
 		echo "default"

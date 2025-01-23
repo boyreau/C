@@ -6,7 +6,7 @@
 #    By: aboyreau <bnzlvosnb@mozmail.com>                     +**+ -- ##+      #
 #                                                             # *   *. #*      #
 #    Created: 2024/07/12 02:16:49 by aboyreau          **+*+  * -_._-   #+     #
-#    Updated: 2024/12/22 01:22:29 by aboyreau          +#-.-*  +         *     #
+#    Updated: 2024/12/22 01:27:19 by aboyreau          +#-.-*  +         *     #
 #                                                      *-.. *   ++       #     #
 # **************************************************************************** #
 
@@ -104,13 +104,13 @@ libs:
 
 # Generate a summary of the code coverage of the project.
 coverage: CFLAGS+=-fprofile-instr-generate -fcoverage-mapping -D TEST=1
-coverage: $(addsuffix .profraw,$(TESTS)) $(NAME)
+coverage: fclean $(addsuffix .profraw,$(TESTS)) $(NAME)
 	@$(eval PROFRAW_FILES=$(addsuffix .profraw,$(TESTS)))
 	@llvm-profdata merge -sparse $(PROFRAW_FILES) -o test/coverage.profdata
 	llvm-cov report -instr-profile=test/coverage.profdata $(addsuffix _test, $(addprefix --object=,$(TESTS))) -sources $(SRCS)
 
 # Run unit tests.
-check: $(NAME) $(TESTS)
+check: fclean $(NAME) $(TESTS)
 
 # Put everything common to your tests in test/common.c.
 test/common.o:

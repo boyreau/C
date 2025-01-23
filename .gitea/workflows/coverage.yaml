@@ -15,4 +15,4 @@ jobs:
         uses: actions/checkout@v4
       - run: |
           make rcov
-          make stats | jq -c .data[0].files.[] > /mnt/coverage/$(date +%Y-%m-%d-%H-%M-%S).json
+          make stats | jq -c '.data[0].files.[]|del(.segments)|del(.mcdc_records)' > /mnt/coverage/$(date +%Y-%m-%d-%H-%M-%S).json

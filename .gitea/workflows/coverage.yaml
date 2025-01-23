@@ -11,7 +11,7 @@ jobs:
     steps:
       - run: |
           pacman -Syu --noconfirm
-          pacman -Sy --noconfirm llvm clang nodejs make 
+          pacman -Sy --noconfirm llvm clang nodejs make jq
           #pacman -Sy docker docker-compose llvm 
       - name: Check out repository code
         uses: actions/checkout@v4

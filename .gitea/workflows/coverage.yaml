@@ -3,16 +3,26 @@ run-name: ${{ gitea.actor }} will ensure your code passes this repository's requ
 on: [push]
 
 jobs:
-  Explore-Gitea-Actions:
-    runs-on: archlinux
+  Run-tests-with-coverage:
+    container:
+      image: gitea:3000/zo/runner:latest
+      credentials:
+        username: ${{ secrets.DOCKERHUB_GITEA_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_GITEA_PASSWORD }}
     steps:
-      - run: |
-          ls -lah /mnt/coverage
-          pacman -Syu --noconfirm
-          pacman -Sy --noconfirm llvm clang nodejs make jq
-          #pacman -Sy docker docker-compose llvm 
-      - name: Check out repository code
+      -
+        name: Add my personal gitea to trusted hosts
+        run: |
+          mkdir -p ~/.ssh || echo 'Creation of ~/.ssh failed'
+          echo '[gitea]:2222 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDtkSVI/yg3j49kovChCkb2E+JHE6LciAVCiStOkuRWtGWxWOTb4+TdCK+bJ1Jgy+5UxQmXBl/ZbgQbL2i2KjBTuQcJmru7DtNFdQjvg2Z2ibQpcC1hI2nFcp1w9iQy2L2E7etW+D+tRJHQd+uDSofyDvV9dI6UvH8ZkzLBQt2Ifus4wfaCcV7Yj/ujfmvSFGwSNYrDYdn2R0K9hyHesSJQcW670sxBD7uzc7dG9iCnvjsKAJXfrk6IyuLgHnyZ2dPZlp2/WaRAd9YygS9/tJCF19cqC/5/UchEUyVMkoYQJVNn648IGh6zee9jhT/fcrE8iP3/K6yoO/SRjZ47RUCx+kKsA/Sl5+s3BDYAM7taHIhDGyjfmaWV+rkTLIqSbLmOc7L7d9A7OeuvkxO3K/dOIAzbPhIX+hD33enxle3PLk4Why8y2ccsKvWd/VejrdUEodyECYjrLtEwB/Mv3quzn+xjnTuTsu6nU4zKrxSB2Jbw+NTPA7Ho19XT3gDRLkAVa16YqFLXx94m5V4pQyyP2sucGBI+m6VSRkyMSEq1kVBBaSrIQ8UKP2raRsSD1lD4f0u/qnsn10+h2Fld9ZpayAlyViDIOd6EtJCCp8WDpdjCxp7OPbrWFmakQ7WvSPwxFO/QAhl5eMbtGLYpWah5zJoxRXSzNflAfwqNNAZlXw==' >> ~/.ssh/known_hosts || echo 'Couldnt add gitea to trusted hosts'
+      -
+        name: Check out repository code
+      -
         uses: actions/checkout@v4
-      - run: |
-          make rcov
+        with:
+          submodules: recursive
+          ssh-key: ${{ secrets.SSH_KEY }}
+      -
+        run: |
+          make check
           make stats | jq -c '.data[0].files.[]|del(.segments)|del(.mcdc_records)' > /mnt/coverage/$(date +%Y-%m-%d-%H-%M-%S).json

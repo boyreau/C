@@ -6,7 +6,7 @@
 #    By: aboyreau <bnzlvosnb@mozmail.com>                     +**+ -- ##+      #
 #                                                             # *   *. #*      #
 #    Created: 2024/07/12 02:16:49 by aboyreau          **+*+  * -_._-   #+     #
-#    Updated: 2025/01/18 11:39:47 by aboyreau          +#-.-*  +         *     #
+#    Updated: 2025/01/31 15:50:41 by aboyreau          +#-.-*  +         *     #
 #                                                      *-.. *   ++       #     #
 # **************************************************************************** #
 
@@ -68,6 +68,9 @@ vpath %.profdata test/
 # Builds the project.
 all: libs $(NAME)
 
+# Echos the project name
+name:
+	@echo $(notdir $(NAME))
 
 # Builds the project's main target.
 $(NAME): $(OBJS)

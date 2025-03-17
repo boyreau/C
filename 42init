@@ -40,9 +40,8 @@ cp ~/.local/skel/42project/.gitignore .
 
 case "$NAME" in
 	*.so | *.a)
-		echo "*.so"
 		sed -i "s|REPLACE_WITH_NAME|lib/$NAME|g" Makefile
-		sed -i "s|^\t$(CC) $(LDFLAGS).*$|ar rc $(NAME) $(OBJS)|g" Makefile
+		sed -i 's|^\t$(CC) $(LDFLAGS).*$|\tar rc $(NAME) $(OBJS)|g' Makefile
 		;;
 	*)
 		echo "default"
@@ -72,9 +71,6 @@ echo 'Git intialization'
 git init
 
 git remote add origin git@codeberg.org:zo/$REPO
-
-echo 'Cloning libft...'
-git submodule add git@codeberg.org:zo/libft lib/libft
 
 git add .* *
 git commit --message 'Initial commit'

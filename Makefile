@@ -6,7 +6,7 @@
 #    By: aboyreau <bnzlvosnb@mozmail.com>                     +**+ -- ##+      #
 #                                                             # *   *. #*      #
 #    Created: 2024/07/12 02:16:49 by aboyreau          **+*+  * -_._-   #+     #
-#    Updated: 2025/01/31 15:50:41 by aboyreau          +#-.-*  +         *     #
+#    Updated: 2025/03/09 21:04:17 by aboyreau          +#-.-*  +         *     #
 #                                                      *-.. *   ++       #     #
 # **************************************************************************** #
 
@@ -130,8 +130,9 @@ vcov: bin/test/$(NAME).profdata
 
 # Generate a summary of the code coverage of the project.
 bin/test/$(NAME).profdata: $(addsuffix .profraw,$(TESTS))
+	@mkdir -p $(@D)
 	$(eval PROFRAW_FILES=$(addsuffix .profraw,$(TESTS)))
-	@llvm-profdata merge $(PROFRAW_FILES) -o ./bin/test/$(NAME).profdata; rm default.profraw
+	@llvm-profdata merge $(PROFRAW_FILES) -o ./bin/test/$(NAME).profdata; rm -f default.profraw
 
 # Build coverage data from raw coverage data.
 %.profdata: %.profraw
@@ -152,7 +153,7 @@ bin/test/%: %.c obj/test/common.o $(OBJS)
 # Put everything common to your tests in test/common.c.
 obj/test/common.o:
 	@mkdir -p $(@D)
-	$(CC) -Wall -Wextra -Werror -I include -I lib/libft/include test/common.c -c -o obj/test/common.o
+	$(CC) $(CFLAGS) $(CPPFLAGS) test/common.c -c -o $@
 
 
 ############################## .h DEPENDENCIES RULE ############################
@@ -177,5 +178,8 @@ include $(addprefix .cache/.d/, $(addsuffix .d, $(notdir $(SRC))))
  # https://stackoverflow.com/questions/35730218/how-to-automatically-generate-a-makefile-help-command
 help:
 	@awk '/^#/{c=substr($$0,3);next}c&&/^[[:alpha:]][[:alnum:]_-]+:/{print substr($$1,1,index($$1,":")),c}1{c=0}' $(MAKEFILE_LIST) | column -s: -t
+
+# Prevent test binaries deletion on failure
+.PRECIOUS: $(TESTS)
 
 .PHONY = all clean fclean re check vcov rcov
